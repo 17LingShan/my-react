@@ -1,5 +1,5 @@
 import "@/index.css";
-import Ling, { createElement } from "@/packages/Ling";
+import Ling from "@/packages/Ling";
 
 const container = document.getElementById("root");
 
@@ -20,11 +20,12 @@ const updateValue = (e) => {
 };
 
 const rerender = (value) => {
-  const element = createElement(
-    "div",
-    null,
-    createElement("input", { onInput: updateValue, value: value }),
-    createElement("h2", null, `Hello ${value}`)
+  /** @jsx Ling.createElement */
+  const element = (
+    <div>
+      <input value={value} onInput={updateValue} />
+      <h2>hello {value}</h2>
+    </div>
   );
 
   Ling.render(element, container);

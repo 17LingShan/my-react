@@ -1,20 +1,7 @@
 import "@/index.css";
+import Ling from "@/packages";
+import Counter from "./Counter";
 
 const container = document.getElementById("root");
-
-const updateValue = (e) => {
-  rerender(e.target.value);
-};
-
-const rerender = (value) => {
-  const element = (
-    <div>
-      <input type="text" value={value} onInput={updateValue} />
-      <h2>hello {value}</h2>
-    </div>
-  );
-
-  Ling.render(element, container);
-};
-
-rerender("react");
+const element = <Counter />;
+Ling.render(element, container);

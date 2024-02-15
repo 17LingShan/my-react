@@ -5,7 +5,6 @@ export default defineConfig({
   plugins: [],
   esbuild: {
     jsxFactory: "Ling.createElement",
-    jsxInject: `import Ling from '@/packages/Ling'`,
   },
   resolve: {
     alias: {

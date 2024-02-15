@@ -1,8 +1,13 @@
-# React + Vite
+# my-react
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## introduction
 
-Currently, two official plugins are available:
+This project shows how to <a href="[text](https://pomb.us/build-your-own-react/)">`build your own React`</a>.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## how to use jsx factory in your vanilla project using Vite
+
+Vite uses esbuild to transforms `JSX` to `JS` and compiles code with `Rollup`.
+
+To configure esbuild for JSX transpilation, edit your `Vite.config.js` file.
+
+If you want to implicit inject your some packages into your `JSX` files, you could use the `jsxInject` option.

@@ -8,6 +8,7 @@ export default function Counter() {
       <h1>number: {count}</h1>
       {/* <button onClick={() => setCount(count +1)}>increment</button> */}
       <button onClick={() => setCount((prev) => prev + 1)}>increment</button>
+      <button onClick={() => setCount((prev) => prev - 1)}>decrement</button>
     </div>
   );
 }

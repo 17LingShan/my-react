@@ -1,8 +1,14 @@
+import { EFFECT_TAG, ELEMENT_TYPE } from "./enum";
 import createElement from "./createElement";
 
+/**
+ * @description create an element according the fiber tree
+ * @param {*} fiber
+ * @returns
+ */
 function createDom(fiber) {
   const dom =
-    fiber.type === "TEXT_ELEMENT"
+    fiber.type === ELEMENT_TYPE.TEXT
       ? document.createTextNode("")
       : document.createElement(fiber.type);
 
@@ -18,13 +24,27 @@ let currentRoot = null;
 let nextUnitOfWork = null;
 let deletions = [];
 
+//判断是否是事件, 事件属性key均为 on 开头
 const isEvent = (key) => key.startsWith("on");
+// 判断是否是属性
 const isProperty = (key) => key !== "children" && !isEvent(key);
-const isNew = (prev, next) => (key) => prev[key] !== next[key];
-const isGone = (prev, next) => (key) => !(key in next);
+// 判断是否是新的属性
+const isNew = (prev, next) => {
+  return (key) => prev[key] !== next[key];
+};
+// 判断是否是旧的属性
+const isGone = (prev, next) => {
+  return (key) => !(key in next);
+};
 
+/**
+ * @description 更新传入的dom, 用新props替换旧props
+ * @param {*} dom 需要更新的dom节点
+ * @param {*} prevProps // 旧props
+ * @param {*} nextProps // 新props
+ */
 function updateDom(dom, prevProps, nextProps) {
-  // remove old or changed event listeners
+  // 移除 新props不包含的事件 和 其对应回调函数引用不同的事件
   Object.keys(prevProps)
     .filter(isEvent)
     .filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
@@ -33,19 +53,19 @@ function updateDom(dom, prevProps, nextProps) {
       dom.removeEventListener(eventType, prevProps[name]);
     });
 
-  // remove old properties
+  // 移除 新props中不包含的属性
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(prevProps, nextProps))
-    .forEach((name) => (dom[name] = ""));
+    .forEach((name) => (dom[name] = "")); // TODO: 使用delete
 
-  // set new or changed properties
+  // 绑定新props的属性
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => (dom[name] = nextProps[name]));
 
-  // add event listeners
+  // 绑定新事件
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
@@ -55,6 +75,9 @@ function updateDom(dom, prevProps, nextProps) {
     });
 }
 
+/**
+ * @description
+ */
 function commitRoot() {
   deletions.forEach(commitWork);
   commitWork(wipRoot.child);
@@ -62,6 +85,11 @@ function commitRoot() {
   wipRoot = null;
 }
 
+/**
+ * @description
+ * @param {*} fiber
+ * @returns
+ */
 function commitWork(fiber) {
   if (!fiber) return;
 
@@ -116,10 +144,8 @@ function workLoop(deadline) {
 requestIdleCallback(workLoop);
 
 /**
- *
  * 在fiber树的某个节点时, 遍历的顺序是 child > sibling > parent
  */
-
 function performUnitOfWork(fiber) {
   const isFunctionComponent = fiber.type instanceof Function;
 
@@ -141,6 +167,7 @@ function performUnitOfWork(fiber) {
 }
 
 export function useState(initial) {
+  // TODO: option chaining
   const oldHook =
     wipFiber.alternate &&
     wipFiber.alternate.hooks &&
@@ -175,6 +202,10 @@ export function useState(initial) {
   return [hook.state, setState];
 }
 
+/**
+ * @description 更新函数组件
+ * @param {} fiber
+ */
 function updateFunctionComponent(fiber) {
   wipFiber = fiber;
   hookIndex = 0;
@@ -183,6 +214,10 @@ function updateFunctionComponent(fiber) {
   reconcileChildren(fiber, children);
 }
 
+/**
+ * @description 更新类组件
+ * @param {*} fiber
+ */
 function updateHostComponent(fiber) {
   if (!fiber.dom) fiber.dom = createDom(fiber);
   reconcileChildren(fiber, fiber.props.children);
@@ -200,9 +235,7 @@ function reconcileChildren(wipFiber, elements) {
     const sameType = oldFiber && element && element.type === oldFiber.type;
 
     /**
-     * update the node.
-     * if the old fiber and the new element have the same type,
-     * we can keep the DOM node and just update it with the new props
+     * 更新dom节点, 如果新旧节点类型相同, 只需要更新其props即可
      */
     if (sameType) {
       newFiber = {
@@ -211,7 +244,7 @@ function reconcileChildren(wipFiber, elements) {
         dom: oldFiber.dom,
         parent: wipFiber,
         alternate: oldFiber,
-        effectTag: "UPDATE",
+        effectTag: EFFECT_TAG.UPDATE,
       };
     }
 
@@ -227,7 +260,7 @@ function reconcileChildren(wipFiber, elements) {
         dom: null,
         parent: wipFiber,
         alternate: null,
-        effectTag: "PLACEMENT",
+        effectTag: EFFECT_TAG.PLACEMENT,
       };
     }
     /**
@@ -236,7 +269,7 @@ function reconcileChildren(wipFiber, elements) {
      * we need to remove the old node
      */
     if (oldFiber && !sameType) {
-      oldFiber.effectTag = "DELETION";
+      oldFiber.effectTag = EFFECT_TAG.DELETION;
       deletions.push(oldFiber);
     }
 

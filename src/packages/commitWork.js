@@ -9,7 +9,9 @@ import { commitDeletion } from "./commitDeletion";
 export function commitWork(fiber) {
   if (!fiber) return;
 
-  // find the parent of a DOM node
+  // 找到最近的具有真实dom的节点
+  // why? 因为并非每一个节点都与真实dom相关联，如Fragment是不会产生真实dom
+  // 还有如Context等逻辑组件也不会产生真实的dom
   let domParentFiber = fiber.parent;
   while (!domParentFiber.dom) domParentFiber = domParentFiber.parent;
 
